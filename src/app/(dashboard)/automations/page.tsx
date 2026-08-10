@@ -156,7 +156,9 @@ export default function AutomationsPage() {
     )
   }
 
-  const showTemplates = automations.length < 3
+  // Always show the starter templates so they stay discoverable even
+  // after the account has several automations.
+  const showTemplates = true
 
   return (
     <div className="space-y-6">
@@ -214,7 +216,7 @@ export default function AutomationsPage() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {automations.map((a) => (
             <AutomationCard
               key={a.id}
@@ -280,60 +282,20 @@ function AutomationCard({
 }) {
   const meta = triggerMeta(automation.trigger_type)
   return (
-    <li className="rounded-xl border border-border bg-card transition-colors hover:border-border">
-      <div className="flex items-center gap-4 p-4">
+    <li className="group flex flex-col rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-card/80">
+      <div className="flex items-center justify-between">
         <div
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10"
+          className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15"
           aria-hidden
         >
-          <Zap className="h-5 w-5 text-primary" />
+          <Zap className="h-5 w-5" />
         </div>
-
-        <button
-          type="button"
-          onClick={onEdit}
-          className="min-w-0 flex-1 text-left"
-        >
-          <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-semibold text-foreground">
-              {automation.name}
-            </span>
-            {automation.is_active && (
-              <span className="relative flex h-2 w-2" aria-label="active">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-            )}
-          </div>
-          {automation.description && (
-            <p className="mt-0.5 truncate text-xs text-muted-foreground">{automation.description}</p>
-          )}
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span
-              className={cn(
-                "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-                meta.pillClass,
-              )}
-            >
-              {meta.label}
-            </span>
-            <span className="tabular-nums">
-              {automation.execution_count === 1
-                ? t("runs", { count: automation.execution_count })
-                : t("runsPlural", { count: automation.execution_count })}
-            </span>
-            <span aria-hidden>·</span>
-            <span>{t("lastRun", { time: formatRelative(automation.last_executed_at) })}</span>
-          </div>
-        </button>
-
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Switch
             checked={automation.is_active}
             onCheckedChange={(v) => onToggle(!!v)}
             aria-label={automation.is_active ? t("deactivate") : t("activate")}
           />
-
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Open menu"
@@ -363,6 +325,44 @@ function AutomationCard({
           </DropdownMenu>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onEdit}
+        className="mt-3 min-w-0 flex-1 text-left"
+      >
+        <div className="flex items-center gap-2">
+          <span className="truncate text-sm font-semibold text-foreground">
+            {automation.name}
+          </span>
+          {automation.is_active && (
+            <span className="relative flex h-2 w-2" aria-label="active">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+          )}
+        </div>
+        {automation.description && (
+          <p className="mt-1 text-xs text-muted-foreground">{automation.description}</p>
+        )}
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
+              meta.pillClass,
+            )}
+          >
+            {meta.label}
+          </span>
+          <span className="tabular-nums">
+            {automation.execution_count === 1
+              ? t("runs", { count: automation.execution_count })
+              : t("runsPlural", { count: automation.execution_count })}
+          </span>
+          <span aria-hidden>·</span>
+          <span>{t("lastRun", { time: formatRelative(automation.last_executed_at) })}</span>
+        </div>
+      </button>
     </li>
   )
 }
