@@ -750,7 +750,7 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
       {/* Canvas */}
       <div className="relative flex-1 overflow-y-auto">
         <div className="absolute inset-0 bg-[radial-gradient(circle,var(--border)_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
-        <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-0 px-4 py-10">
+        <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-0 px-4 py-10">
           <ResourcesProvider>
             <TriggerCard
               type={state.trigger_type}
@@ -795,9 +795,9 @@ function TriggerCard({
 }) {
   const [open, setOpen] = useState(false)
   return (
-    // Card width: full on mobile, fixed 320px on sm+. The canvas wrapper
-    // (max-w-2xl + px-4) keeps this tidy on tablet/desktop.
-    <div className="z-10 w-full max-w-[320px] sm:w-80">
+    // Card width: full on mobile, up to 800px on sm+. The canvas wrapper
+    // (max-w-5xl + px-4) keeps this tidy on tablet/desktop.
+    <div className="z-10 w-full max-w-[800px]">
       <div className="rounded-lg border border-border border-l-4 border-l-blue-500 bg-card shadow-lg">
         <button
           type="button"
@@ -1099,12 +1099,12 @@ function StepRenderer({
   const Icon = meta.icon
   const expanded = props.expandedId === step.cid
   const isCondition = step.step_type === "condition"
-  // Card widths on mobile fill the full canvas column (max-w-2xl px-4
-  // still keeps them reasonable). On sm+ the original fixed widths
-  // come back so the flow visual stays recognisable.
+  // Card widths fill the canvas column (max-w-5xl px-4) up to a generous
+  // max so the step editors (e.g. interactive message rows) are readable.
+  // Branch cards stay fluid so the two-column Yes/No grid never overflows.
   const width = isCondition
-    ? "w-full max-w-[400px] sm:w-[400px]"
-    : "w-full max-w-[320px] sm:w-80"
+    ? "w-full max-w-[880px]"
+    : "w-full max-w-[800px]"
 
   return (
     <>
