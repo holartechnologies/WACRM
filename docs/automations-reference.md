@@ -1,6 +1,6 @@
 # Automations Reference
 
-Current trigger + step configs for all automations in the account (`d4a79322-5623-4c07-88da-14e2de9ba08b`), pulled live from Supabase.
+Current trigger + step configs for all automations and flows in the account (`d4a79322-5623-4c07-88da-14e2de9ba08b`), pulled live from Supabase.
 
 **Trigger key**
 
@@ -9,6 +9,19 @@ Current trigger + step configs for all automations in the account (`d4a79322-562
 - `keyword_match` — fires when an inbound text matches the configured keywords.
 - `tag_added` — fires when a conversation gets a specific tag.
 - `time_based` — fires on a schedule (cron or `HH:mm`).
+
+**Flow vs automation:** the Flow **"Sales Enquiry - First Contact"** owns the first-contact conversation (welcome → menu → qualification). When a Flow consumes an inbound tap, the matching `interactive_reply` automations below are skipped for that tap — so they're currently shadowed for first-contact threads but still active and reusable elsewhere.
+
+## Flow: Sales Enquiry - First Contact
+- **ID:** `4bccf087-bcd0-485d-9ed1-6279887efab3`
+- **Status:** active · **Trigger:** `first_inbound_message` (`{}`) · **Entry:** `start` · 24 nodes
+- **Path:**
+  1. `start` → `welcome` (send_message: 👋 welcome + 8 numbered services)
+  2. `menu` (send_list): `service_sales` → services list · `service_support` → support · `service_human`/`service_other` → human
+  3. `services_list` (send_list): 8 services — `svc_web_design`, `svc_redesign`, `svc_ecommerce`, `svc_seo`, `svc_ai`, `svc_custom`, `svc_marketing`, `svc_human` — each row → its own tailored message
+  4. Qualification (`collect_input` × 6): `name` → `company` → `requirement` → `existing` → `timeline` → `budget`
+  5. `qualify_tag` (set_tag `qualified`) → `sales_handoff` (handoff, assigned to `fd645531-49bf-469b-98be-891b7e57c51a`) with note: `Name / Company / Requirement / Existing platform / Timeline / Budget`
+  6. `support_msg` → `support_handoff` · `human_msg` → `human_handoff`
 
 ## Untitled automation
 - **ID:** `dd480f1f-5af5-439a-bdcc-275a0aebcee0`
@@ -82,3 +95,4 @@ Current trigger + step configs for all automations in the account (`d4a79322-562
 | hot | #ef4444 | `232f310a-0ea2-4278-b514-ddb1b53d1868` |
 | warm | #f59e0b | `9fb5b1c4-5ecd-444a-b099-ead8a36addc7` |
 | nurture | #3b82f6 | `27730a67-413c-413d-98b2-aef7ed7357a2` |
+| qualified | #22c55e | `3dc5f9da-94a5-46cc-9515-f4784f1bad45` |
