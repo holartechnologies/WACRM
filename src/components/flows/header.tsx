@@ -23,9 +23,12 @@
  */
 
 import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   CircleDot,
+  Copy,
   History,
   Loader2,
   PauseCircle,
@@ -56,6 +59,29 @@ export function EditorHeader() {
     setStatus,
     deleteFlow,
   } = useFlowEditor();
+
+  const [duplicating, setDuplicating] = useState(false);
+
+  const handleDuplicate = useCallback(async () => {
+    setDuplicating(true);
+    try {
+      const res = await fetch(`/api/flows/${flow.id}/duplicate`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? `Duplicate failed: ${res.status}`);
+      }
+      const json = (await res.json()) as { flow: { id: string } };
+      toast.success("Flow duplicated.");
+      router.push(`/flows/${json.flow.id}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Duplicate failed";
+      toast.error(msg);
+    } finally {
+      setDuplicating(false);
+    }
+  }, [flow.id, router]);
 
   return (
     <div className="flex flex-col gap-1.5 px-6 pt-5">
@@ -105,6 +131,19 @@ export function EditorHeader() {
             <span className="ml-0.5 rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">
               {flow.execution_count}
             </span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => void handleDuplicate()}
+            disabled={duplicating}
+          >
+            {duplicating ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+            Duplicate
           </Button>
           <Button
             variant="ghost"

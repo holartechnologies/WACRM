@@ -16,6 +16,7 @@ import {
   HelpCircle,
   UserPlus,
   FileText,
+  Copy,
 } from "lucide-react";
 
 import { useTranslations } from "next-intl";
@@ -177,6 +178,24 @@ export default function FlowsPage() {
     }
   }
 
+  async function handleDuplicate(flow: FlowRow) {
+    try {
+      const res = await fetch(`/api/flows/${flow.id}/duplicate`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? `Duplicate failed: ${res.status}`);
+      }
+      const json = (await res.json()) as { flow: FlowRow };
+      setFlows((prev) => [json.flow, ...prev]);
+      toast.success(t("duplicateSuccess"));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t("duplicateError");
+      toast.error(msg);
+    }
+  }
+
   async function handleDelete(flow: FlowRow) {
     const yes = window.confirm(t("deleteConfirm", { name: flow.name }));
     if (!yes) return;
@@ -236,6 +255,7 @@ export default function FlowsPage() {
               key={flow.id}
               flow={flow}
               onEdit={() => router.push(`/flows/${flow.id}`)}
+              onDuplicate={() => handleDuplicate(flow)}
               onDelete={() => handleDelete(flow)}
               t={t}
             />
@@ -359,11 +379,13 @@ function EmptyState({
 function FlowCard({
   flow,
   onEdit,
+  onDuplicate,
   onDelete,
   t,
 }: {
   flow: FlowRow;
   onEdit: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
@@ -410,6 +432,10 @@ function FlowCard({
         <Button variant="ghost" size="sm" onClick={onEdit}>
           <Pencil className="h-3.5 w-3.5" />
           {t("edit")}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onDuplicate}>
+          <Copy className="h-3.5 w-3.5" />
+          {t("duplicate")}
         </Button>
         <Button
           variant="ghost"
